@@ -1,27 +1,41 @@
 import axios from "axios";
-import type { Movie } from "../types/movie";
-interface MovieResponse {
-  page: number;
-  results: Movie[];
-  total_pages: number;
+import type { Movie } from '../types/movie';
+
+
+export interface MoviesResponse {
+    page: number;
+    results: Movie[];
+    total_pages: number;
+    total_results: number;
 }
-const URL = "https://api.themoviedb.org/3/search/movie";
-const token = import.meta.env.VITE_TMDB_TOKEN;
-export const fetchMovies = async (
-  query: string,
-  page: number
-): Promise<MovieResponse> => {
-  const response = await axios.get<MovieResponse>(URL, {
-    params: {
-      query,
-      page,
-      include_adult: false,
-      language: "en-US",
-    },
+
+const BASE_URL = 'https://api.themoviedb.org/3';
+const TOKEN = import.meta.env.VITE_TMDB_TOKEN;
+
+if (!TOKEN) {
+    throw new Error('VITE_TMDB_TOKEN  environment variable is not set');
+}
+
+const api = axios.create({
+    baseURL: BASE_URL,
     headers: {
-      Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${TOKEN}`,
     },
-  });
-  return response.data;
+});
+
+export const fetchMovies = async (query: string, page: number = 1): Promise<MoviesResponse> => {
+    try {
+        const response = await api.get<MoviesResponse>('/search/movie', {
+            params: {
+                query,
+                include_adult: false,
+                language: 'en-US',
+                page: page,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to fetch movies:', error);
+        throw error;
+    }
 };
-export const imgURL = "https://image.tmdb.org/t/p/w500/";
