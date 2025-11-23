@@ -1,41 +1,27 @@
+import { type Movie } from "../types/movie.ts";
+
 import axios from "axios";
-import type { Movie } from '../types/movie';
 
-
-export interface MoviesResponse {
-    page: number;
-    results: Movie[];
-    total_pages: number;
-    total_results: number;
+export interface GetMovieRes {
+  results: Movie[];
+  page: number;
+  total_pages: number;
 }
+export const axiosConfig = {
+  url: "https://api.themoviedb.org/3/search/movie",
+  headers: {
+    accept: "application/json",
+    Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
+  },
+};
+export const fetchMovies = async (
+  newQuery: string,
+  page: number = 1
+): Promise<GetMovieRes> => {
+  const res = await axios.get<GetMovieRes>(
+    `${axiosConfig.url}?query=${newQuery}&page=${page}`,
+    axiosConfig
+  );
 
-const BASE_URL = 'https://api.themoviedb.org/3';
-const TOKEN = import.meta.env.VITE_TMDB_TOKEN;
-
-if (!TOKEN) {
-    throw new Error('VITE_TMDB_TOKEN  environment variable is not set');
-}
-
-const api = axios.create({
-    baseURL: BASE_URL,
-    headers: {
-        Authorization: `Bearer ${TOKEN}`,
-    },
-});
-
-export const fetchMovies = async (query: string, page: number = 1): Promise<MoviesResponse> => {
-    try {
-        const response = await api.get<MoviesResponse>('/search/movie', {
-            params: {
-                query,
-                include_adult: false,
-                language: 'en-US',
-                page: page,
-            },
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Failed to fetch movies:', error);
-        throw error;
-    }
+  return res.data;
 };

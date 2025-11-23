@@ -1,53 +1,49 @@
-
-import { useRef } from "react";
-import toast from 'react-hot-toast';
-import styles from './SearchBar.module.css';
+import css from "./SearchBar.module.css";
+import toast, { Toaster } from "react-hot-toast";
 
 interface SearchBarProps {
-    onSubmit: (query: string) => void;
+  onSubmit: (query: string) => void;
 }
 
 export default function SearchBar({ onSubmit }: SearchBarProps) {
-    const inputRef = useRef<HTMLInputElement>(null);
-
-    const handleAction = async (formData: FormData) => {
-        const query = formData.get('query') as string;
-        const trimmedQuery = query.trim();
-        
-        if (!trimmedQuery) {
-            toast.error('Please enter your search query.');
-            return;
-        }
-
-        onSubmit(trimmedQuery);
-    };
-
-    return (
-        <header className={styles.header}>
-            <div className={styles.container}>
-                <a
-                    className={styles.link}
-                    href="https://www.themoviedb.org/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    Powered by TMDB
-                </a>
-                <form className={styles.form} action={handleAction}> 
-                    <input
-                        ref={inputRef}
-                        className={styles.input}
-                        type="text"
-                        name="query"
-                        autoComplete="off"
-                        placeholder="Search movies..."
-                        autoFocus
-                    />
-                    <button className={styles.button} type="submit">
-                        Search
-                    </button>
-                </form>
-            </div>
-        </header>
-    );
+  const handleSubmit = (formData: FormData) => {
+    if (formData.get("query") === "") {
+      notifyError();
+      return;
+    }
+    const query = formData.get("query") as string;
+    onSubmit(query);
+  };
+  const notifyError = () =>
+    toast.error("Please enter your search query.", {
+      style: { background: "rgba(244, 129, 130, 0.8)" },
+    });
+  return (
+    <header className={css.header}>
+      <div className={css.container}>
+        <a
+          className={css.link}
+          href="https://www.themoviedb.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Powered by TMDB
+        </a>
+        <form action={handleSubmit} className={css.form}>
+          <input
+            className={css.input}
+            type="text"
+            name="query"
+            autoComplete="off"
+            placeholder="Search movies..."
+            autoFocus
+          />
+          <button className={css.button} type="submit">
+            Search
+          </button>
+          <Toaster />
+        </form>
+      </div>
+    </header>
+  );
 }
